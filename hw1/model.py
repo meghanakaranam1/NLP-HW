@@ -74,17 +74,28 @@ def featurize(sentence: str, embeddings: gensim.models.keyedvectors.KeyedVectors
     # A torch tensor of shape (embed_dim,) - the average word embedding of the sentence
     # Hint: follow the hints in the pdf description
 
+    if not vectors:
+        return None
+
+    average_embedding = np.mean(vectors, axis=0)  
+
+    return torch.FloatTensor(average_embedding)
+
 
 def create_tensor_dataset(raw_data: Dict[str, List[Union[int, str]]],
                           embeddings: gensim.models.keyedvectors.KeyedVectors) -> TensorDataset:
     all_features, all_labels = [], []
     for text, label in tqdm(zip(raw_data['text'], raw_data['label'])):
 
+        feature = featurize(text, embeddings)
+
         # TODO: complete the for loop to featurize each sentence
         # only add the feature and label to the list if the feature is not None
+        if feature is not None:
+            all_features.append(feature)
+            all_labels.append(label)
+
         
-
-
         # your code ends here
 
     # stack all features and labels into two single tensors and create a TensorDataset
@@ -116,7 +127,7 @@ class SentimentClassifier(nn.Module):
 
         # TODO: define the linear layer
         # Hint: follow the hints in the pdf description
-        
+        self.linear = nn.Linear(embed_dim, num_classes)
         # your code ends here
 
         self.loss = nn.CrossEntropyLoss(reduction='mean')
@@ -124,7 +135,7 @@ class SentimentClassifier(nn.Module):
     def forward(self, inp):
         # TODO: complete the forward function
         # Hint: follow the hints in the pdf description
-        
+        logits = self.linear(inp)
         
         # your code ends here
 
@@ -142,6 +153,9 @@ def accuracy(logits: torch.FloatTensor, labels: torch.LongTensor) -> torch.Float
     # Hint: follow the hints in the pdf description, the return should be a tensor of 0s and 1s with the same shape as labels
     # labels is a tensor of shape (batch_size,)
     # logits is a tensor of shape (batch_size, num_classes)
+    predicted_labels = torch.argmax(logits, dim=1)
+    correct_predictions = (predicted_labels == labels)
+    return correct_predictions
 
 
 def evaluate(model: SentimentClassifier, eval_dataloader: DataLoader) -> Tuple[float, float]:
