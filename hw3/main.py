@@ -149,7 +149,6 @@ def explore_mlp_learning_rates(dev_d: Dict[str, List[Union[str, int]]],
         all_emb_epoch_dev_accs.append(epoch_dev_accs)
         all_emb_epoch_dev_losses.append(epoch_dev_loss)
 
-    # Generate plots for accuracy and loss across different learning rates
     visualize_configs(all_emb_epoch_dev_accs, lrs_names, "Accuracy", "./all_mlp_lrs_acc.png")
     visualize_configs(all_emb_epoch_dev_losses, lrs_names, "Loss", "./all_mlp_lrs_loss.png")
     # your code ends here
